@@ -52,7 +52,3 @@ tasks.build {
 tasks.withType<Test> {
     useJUnitPlatform()
 }
-
-listOf("distTar", "distZip", "shadowDistTar", "shadowDistZip", "startScripts", "startShadowScripts").forEach { taskName ->
-    tasks.findByName(taskName)?.enabled = false
-}
