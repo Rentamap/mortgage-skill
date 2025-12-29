@@ -1,16 +1,14 @@
 package com.rentamap.cli
 
-import kotlin.math.pow
+import org.apache.commons.math3.util.FastMath
 
 class FrenchPropertyInvestmentCalculator {
 
     fun analyze(input: PropertyInvestmentInput): PropertyInvestmentResult {
-        // Validate input
         validateInput(input)
 
         val loanAmount = input.propertyPrice - input.downPayment
 
-        // Calculate mortgage details
         val monthlyRate = input.interestRate / 100.0 / 12.0
         val numPayments = input.loanTermYears * 12
 
@@ -20,12 +18,9 @@ class FrenchPropertyInvestmentCalculator {
             numPayments
         )
 
-        // Calculate French mortgage life insurance (0.25% - 0.70% of loan amount annually)
-        // Using middle estimate of 0.40% for non-smoker
         val monthlyLifeInsurance = (loanAmount * 0.004) / 12.0
         val totalMonthlyMortgage = monthlyMortgagePayment + monthlyLifeInsurance
 
-        // Calculate total interest over loan term
         val totalMortgagePayments = totalMonthlyMortgage * numPayments
         val totalInterest = totalMortgagePayments - loanAmount
 
@@ -35,37 +30,32 @@ class FrenchPropertyInvestmentCalculator {
             totalPayments = totalMortgagePayments
         )
 
-        // Calculate initial investment (down payment + French upfront costs)
-        val arrangementFee = loanAmount * 0.01  // 1% of loan
-        val registrationFee = loanAmount * 0.015  // 1.5% of loan
+        val arrangementFee = loanAmount * 0.01
+        val registrationFee = loanAmount * 0.015
         val surveyFee = 750.0
         val initialInvestment = input.downPayment + arrangementFee + registrationFee + surveyFee
 
-        // Generate yearly projections
         val yearlyProjections = mutableListOf<YearlyProjection>()
         var cumulativeCashFlow = -initialInvestment
         var remainingBalance = loanAmount
         var breakEvenYear: Int? = null
 
         for (year in 1..input.holdingPeriodYears) {
-            // Calculate rental income for this year (with rent increases)
-            val rentMultiplier = (1 + input.rentIncreaseAnnual / 100.0).pow(year - 1)
+            val rentMultiplier = FastMath.pow(1 + input.rentIncreaseAnnual / 100.0, (year - 1).toDouble())
             val baseMonthlyRent = input.monthlyRent * rentMultiplier
             val effectiveMonthlyRent = baseMonthlyRent * (1 - input.vacancyRate / 100.0)
             val annualRentalIncome = effectiveMonthlyRent * 12
 
-            // Calculate expenses for this year
             val annualMortgage = totalMonthlyMortgage * 12
             val annualPropertyTax = input.propertyTaxAnnual
             val annualHoa = input.hoaMonthly * 12
             val annualMaintenance = input.propertyPrice * (input.maintenancePercent / 100.0)
             val annualManagement = baseMonthlyRent * 12 * (input.managementFeePercent / 100.0)
-            val annualInsurance = loanAmount * 0.004  // Life insurance included in mortgage
+            val annualInsurance = loanAmount * 0.004
 
             val totalExpenses = annualMortgage + annualPropertyTax + annualHoa +
                                annualMaintenance + annualManagement
 
-            // Calculate principal paydown for this year
             val principalPaydown = calculateYearlyPrincipalPaydown(
                 remainingBalance,
                 monthlyRate,
@@ -76,16 +66,13 @@ class FrenchPropertyInvestmentCalculator {
 
             remainingBalance -= principalPaydown
 
-            // Net cash flow for this year
             val netCashFlow = annualRentalIncome - totalExpenses
             cumulativeCashFlow += netCashFlow
 
-            // Check for break-even
             if (breakEvenYear == null && cumulativeCashFlow >= 0) {
                 breakEvenYear = year
             }
 
-            // Total equity = down payment + cumulative principal paydown
             val totalEquity = input.downPayment + (loanAmount - remainingBalance)
 
             yearlyProjections.add(
@@ -110,7 +97,6 @@ class FrenchPropertyInvestmentCalculator {
             )
         }
 
-        // Calculate summary metrics
         val totalRentalIncome = yearlyProjections.sumOf { it.rentalIncome }
         val totalExpenses = yearlyProjections.sumOf { it.expenses.total }
         val totalCashFlow = totalRentalIncome - totalExpenses
@@ -146,8 +132,11 @@ class FrenchPropertyInvestmentCalculator {
         if (monthlyRate == 0.0) {
             return principal / numPayments
         }
-        return principal * (monthlyRate * (1 + monthlyRate).pow(numPayments)) /
-               ((1 + monthlyRate).pow(numPayments) - 1)
+
+        val rateTimesOnePlusRatePowN = monthlyRate * FastMath.pow(1 + monthlyRate, numPayments.toDouble())
+        val onePlusRatePowNMinusOne = FastMath.pow(1 + monthlyRate, numPayments.toDouble()) - 1
+
+        return principal * rateTimesOnePlusRatePowN / onePlusRatePowNMinusOne
     }
 
     private fun calculateYearlyPrincipalPaydown(
@@ -157,7 +146,6 @@ class FrenchPropertyInvestmentCalculator {
         currentYear: Int,
         loanTermYears: Int
     ): Double {
-        // Don't calculate beyond loan term
         if (currentYear > loanTermYears) {
             return 0.0
         }
@@ -165,7 +153,6 @@ class FrenchPropertyInvestmentCalculator {
         var balance = startingBalance
         var yearlyPrincipal = 0.0
 
-        // Calculate principal for 12 months
         for (month in 1..12) {
             if (balance <= 0) break
 

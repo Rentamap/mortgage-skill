@@ -18,6 +18,7 @@ dependencies {
     implementation(libs.clikt)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlin.stdlib)
+    implementation(libs.commons.math)
 
     testImplementation(libs.kotest.runner)
     testImplementation(libs.kotest.assertions)
