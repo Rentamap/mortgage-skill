@@ -1,27 +1,27 @@
+import java.util.Properties
+
 plugins {
-    kotlin("jvm") version "2.3.0"
-    kotlin("plugin.serialization") version "2.3.0"
-    id("com.gradleup.shadow") version "8.3.6"
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.shadow)
     application
 }
 
+val versionProps = Properties().apply {
+    file("version.properties").inputStream().use { load(it) }
+}
+
 group = "com.rentamap"
-version = "1.0.0"
+version = versionProps.getProperty("version")
 
 dependencies {
-    // CLI framework
-    implementation("com.github.ajalt.clikt:clikt:4.2.2")
+    implementation(libs.clikt)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.kotlin.stdlib)
 
-    // JSON serialization
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
-
-    // Kotlin stdlib
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.0.0")
-
-    // Testing
-    testImplementation("io.kotest:kotest-runner-junit5:5.8.0")
-    testImplementation("io.kotest:kotest-assertions-core:5.8.0")
-    testImplementation("io.kotest:kotest-property:5.8.0")
+    testImplementation(libs.kotest.runner)
+    testImplementation(libs.kotest.assertions)
+    testImplementation(libs.kotest.property)
 }
 
 kotlin {
@@ -41,6 +41,18 @@ tasks.shadowJar {
     }
 }
 
+tasks.jar {
+    enabled = false
+}
+
+tasks.build {
+    dependsOn(tasks.shadowJar)
+}
+
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+listOf("distTar", "distZip", "shadowDistTar", "shadowDistZip", "startScripts", "startShadowScripts").forEach { taskName ->
+    tasks.findByName(taskName)?.enabled = false
 }
