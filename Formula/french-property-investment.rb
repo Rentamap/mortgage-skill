@@ -1,8 +1,8 @@
 class FrenchPropertyInvestment < Formula
   desc "Analyze French rental property investments with comprehensive cash flow projections"
-  homepage "https://github.com/yourusername/french-property-investment"
-  url "https://github.com/yourusername/french-property-investment/releases/download/v1.0.0/french-property-investment.jar"
-  sha256 "PUT_SHA256_HERE"
+  homepage "https://github.com/jordanterry/french-mortgage-cli"
+  url "https://github.com/jordanterry/french-mortgage-cli/releases/download/v1.0.0/french-property-investment.jar"
+  sha256 "8f87a8f99b1b1f37f7f58a65f74eb94d1effb6d90b9809b82e7dd4c5f43a0986"
   version "1.0.0"
   license "MIT"
 

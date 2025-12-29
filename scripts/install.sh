@@ -5,7 +5,7 @@ set -e
 
 VERSION="${1:-1.0.0}"
 INSTALL_DIR="${HOME}/.local/bin"
-JAR_URL="https://github.com/yourusername/french-property-investment/releases/download/v${VERSION}/french-property-investment.jar"
+JAR_URL="https://github.com/jordanterry/french-mortgage-cli/releases/download/v${VERSION}/french-property-investment.jar"
 
 echo "Installing French Property Investment Analyzer v${VERSION}..."
 
