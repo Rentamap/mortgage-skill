@@ -6,7 +6,7 @@ class FrenchPropertyInvestment < Formula
   version "1.0.0"
   license "MIT"
 
-  depends_on "openjdk@11"
+  depends_on "openjdk@17"
 
   def install
     libexec.install "french-property-investment.jar"
@@ -14,7 +14,7 @@ class FrenchPropertyInvestment < Formula
     # Create wrapper script
     (bin/"french-property-investment").write <<~EOS
       #!/bin/bash
-      exec "#{Formula["openjdk@11"].opt_bin}/java" -jar "#{libexec}/french-property-investment.jar" "$@"
+      exec "#{Formula["openjdk@17"].opt_bin}/java" -jar "#{libexec}/french-property-investment.jar" "$@"
     EOS
   end
 
